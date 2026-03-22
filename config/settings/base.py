@@ -13,7 +13,28 @@ import os
 import sys
 import environ
 from pathlib import Path
+REST_FRAMEWORK = {
+    # Documentation automatique
+    'DEFAULT_SCHEMA_CLASS': 'drf_spectacular.openapi.AutoSchema',
+    
+    # Authentification par défaut (Session pour le dev, Token pour l'API)
+    'DEFAULT_AUTHENTICATION_CLASSES': [
+        'rest_framework.authentication.TokenAuthentication',
+        'rest_framework.authentication.SessionAuthentication',
+    ],
+    
+    # Permissions par défaut (Lecture seule si non authentifié)
+    'DEFAULT_PERMISSION_CLASSES': [
+        'rest_framework.permissions.IsAuthenticatedOrReadOnly',
+    ],
+}
 
+SPECTACULAR_SETTINGS = {
+    'TITLE': 'Mon API Projet',
+    'DESCRIPTION': 'Documentation des endpoints JSON',
+    'VERSION': '1.0.0',
+    'SERVE_INCLUDE_SCHEMA': False,
+}
 # 1. Définition des chemins (on remonte de 3 niveaux depuis settings/base.py)
 BASE_DIR = Path(__file__).resolve().parent.parent.parent
 
@@ -44,7 +65,9 @@ INSTALLED_APPS = [
     'apps.users',
     'apps.products',
     'api', 
-
+    'rest_framework',
+    'rest_framework.authtoken', # Pour l'auth par jeton (Token)
+    'drf_spectacular',         # Pour Swagger
 
 ]
 
