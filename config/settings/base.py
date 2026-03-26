@@ -62,7 +62,7 @@ INSTALLED_APPS = [
     'django.contrib.sessions',
     'django.contrib.messages',
     'django.contrib.staticfiles',
-    'apps.users',
+    'apps.users.apps.UsersConfig',
     'apps.products',
     'api', 
     'rest_framework',
@@ -166,3 +166,5 @@ META_API_KEY = env('META_API_KEY', default=None)
 
 # TikTok
 TIKTOK_API_KEY = env('TIKTOK_API_KEY', default=None)
+
+AUTH_USER_MODEL = 'users.User' 
