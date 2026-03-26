@@ -4,6 +4,13 @@ from django.http import HttpResponse
 from django.conf import settings  
 from django.conf.urls.static import static
 from drf_spectacular.views import SpectacularAPIView, SpectacularSwaggerView
+from django.urls import path
+from rest_framework_simplejwt.views import (
+    TokenObtainPairView,
+    TokenRefreshView,
+    TokenBlacklistView,
+)
+
 #  vue pour l'accueil
 def home(request):
     return HttpResponse("<h1>Bienvenue sur SIMZO !</h1><p>Le serveur fonctionne.</p>")
@@ -16,7 +23,14 @@ urlpatterns = [
     path('api/docs/', SpectacularSwaggerView.as_view(url_name='schema'), name='swagger-ui'),
     # Auth pour l'interface de navigation DRF
     path('api-auth/', include('rest_framework.urls')),
-
+        # Login : retourne access et refresh
+    path('api/auth/login/', TokenObtainPairView.as_view(), name='token_obtain_pair'),
+    
+    # Refresh : échange le refresh token contre un nouvel access
+    path('api/auth/refresh/', TokenRefreshView.as_view(), name='token_refresh'),
+    
+    # Logout : met le refresh token en blacklist
+    path('api/auth/logout/', TokenBlacklistView.as_view(), name='token_blacklist'),
 ]
 
 if settings.DEBUG: urlpatterns += static(settings.MEDIA_URL, document_root=settings.MEDIA_ROOT)

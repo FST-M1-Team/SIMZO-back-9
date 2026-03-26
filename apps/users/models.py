@@ -40,14 +40,8 @@ class User(AbstractBaseUser, PermissionsMixin):
 
     objects = CustomUserManager()
 
-    USERNAME_FIELD = 'email'
-    REQUIRED_FIELDS = [] 
-
     def __str__(self):
         return self.email
-
-
-
 
 class AnnonceurProfile(models.Model):
     user = models.OneToOneField(User, on_delete=models.CASCADE, related_name='annonceur_profile')

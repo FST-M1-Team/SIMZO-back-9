@@ -13,21 +13,9 @@ import os
 import sys
 import environ
 from pathlib import Path
-REST_FRAMEWORK = {
-    # Documentation automatique
-    'DEFAULT_SCHEMA_CLASS': 'drf_spectacular.openapi.AutoSchema',
-    
-    # Authentification par défaut (Session pour le dev, Token pour l'API)
-    'DEFAULT_AUTHENTICATION_CLASSES': [
-        'rest_framework.authentication.TokenAuthentication',
-        'rest_framework.authentication.SessionAuthentication',
-    ],
-    
-    # Permissions par défaut (Lecture seule si non authentifié)
-    'DEFAULT_PERMISSION_CLASSES': [
-        'rest_framework.permissions.IsAuthenticatedOrReadOnly',
-    ],
-}
+from datetime import timedelta
+DEBUG = True
+ALLOWED_HOSTS = ['*']
 
 SPECTACULAR_SETTINGS = {
     'TITLE': 'Mon API Projet',
@@ -40,18 +28,15 @@ BASE_DIR = Path(__file__).resolve().parent.parent.parent
 
 # 2. Ajout du dossier 'apps' au chemin de recherche Python
 sys.path.insert(0, str(BASE_DIR / 'apps'))
-
 # 3. Initialisation de django-environ
 env = environ.Env(
-    DEBUG=(bool, False) # Valeur par défaut
+    DEBUG=(bool, True) # On met True par défaut ici aussi
 )
-# Lecture du fichier .env à la racine du projet
-environ.Env.read_env(os.path.join(BASE_DIR, '.env'))
-
-SECRET_KEY = env('SECRET_KEY')
-DEBUG = env('DEBUG')
+# La lecture du fichier doit être APRÈS la parenthèse
+#environ.Env.read_env(os.path.join(BASE_DIR, '.env'))
+SECRET_KEY = 'django-insecure-test-key-pour-debloquer'
+DEBUG = True
 ALLOWED_HOSTS = ['*']
-
 
 # Application definition
 
@@ -68,9 +53,17 @@ INSTALLED_APPS = [
     'rest_framework',
     'rest_framework.authtoken', # Pour l'auth par jeton (Token)
     'drf_spectacular',         # Pour Swagger
-
+    'rest_framework_simplejwt',
+    'rest_framework_simplejwt.token_blacklist', # Pour le Logout (liste noire)
 ]
-
+# Configuration JWT
+SIMPLE_JWT = {
+    'ACCESS_TOKEN_LIFETIME': timedelta(minutes=60),
+    'REFRESH_TOKEN_LIFETIME': timedelta(days=1),
+    'ROTATE_REFRESH_TOKENS': True,
+    'BLACKLIST_AFTER_ROTATION': True, # Important pour le logout définitif
+    'AUTH_HEADER_TYPES': ('Bearer',),
+}
 MIDDLEWARE = [
     'django.middleware.security.SecurityMiddleware',
     'django.contrib.sessions.middleware.SessionMiddleware',
@@ -80,15 +73,8 @@ MIDDLEWARE = [
     'django.contrib.messages.middleware.MessageMiddleware',
     'django.middleware.clickjacking.XFrameOptionsMiddleware',
 ]
-
-
-
 ROOT_URLCONF = 'config.urls'  
 WSGI_APPLICATION = 'config.wsgi.application'
-
-
-
-
 TEMPLATES = [
     {
         'BACKEND': 'django.template.backends.django.DjangoTemplates',
@@ -104,11 +90,6 @@ TEMPLATES = [
         },
     },
 ]
-
-WSGI_APPLICATION = 'config.wsgi.application'
-
-
-
 # Database
 # https://docs.djangoproject.com/en/4.2/ref/settings/#databases
 
@@ -118,8 +99,6 @@ DATABASES = {
         'NAME': BASE_DIR / 'db.sqlite3',
     }
 }
-
-
 # Password validation
 # https://docs.djangoproject.com/en/4.2/ref/settings/#auth-password-validators
 
@@ -137,8 +116,6 @@ AUTH_PASSWORD_VALIDATORS = [
         'NAME': 'django.contrib.auth.password_validation.NumericPasswordValidator',
     },
 ]
-
-
 # Internationalization
 # https://docs.djangoproject.com/en/4.2/topics/i18n
 LANGUAGE_CODE = 'fr-fr'
@@ -166,5 +143,17 @@ META_API_KEY = env('META_API_KEY', default=None)
 
 # TikTok
 TIKTOK_API_KEY = env('TIKTOK_API_KEY', default=None)
-
-AUTH_USER_MODEL = 'users.User' 
+AUTH_USER_MODEL = 'users.User'
+REST_FRAMEWORK = {
+    'DEFAULT_SCHEMA_CLASS': 'drf_spectacular.openapi.AutoSchema',
+    'DEFAULT_AUTHENTICATION_CLASSES': (
+        'rest_framework_simplejwt.authentication.JWTAuthentication',
+        'rest_framework.authentication.SessionAuthentication',
+    ),
+    'DEFAULT_PERMISSION_CLASSES': [
+        'rest_framework.permissions.IsAuthenticated',
+    ],
+}
+DEBUG = True
+ALLOWED_HOSTS = ['*']
+print(f"DEBUG VALEUR FINALE: {DEBUG}")
